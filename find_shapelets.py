@@ -257,7 +257,6 @@ class ShapeletFinder(object):
                     all_shapelets[label] = np.vstack((all_shapelets[label], shapelets))
                 except ValueError:
                     all_shapelets[label] = shapelets
-
         for k in all_shapelets.keys():
             all_shapelets[k] = self.cluster(all_shapelets[k])
         return all_shapelets
@@ -410,7 +409,7 @@ class Evaluation(object):
             split = int(data.shape[0] * (mode / 100.))
             kf = [(idx[:split], idx[split:])]
         elif mode == "cv":
-            kf = KFold(data.shape[0], n_folds=10, shuffle=True)
+            kf = KFold(data.shape[0], n_folds=5, shuffle=True)
         elif mode is None:
             kf = [(range(data.shape[0]), range(data.shape[0]))]
         for d_max in self.d_max:
@@ -434,6 +433,7 @@ class Evaluation(object):
                                 t = time.time()
                                 result = sml.findingshapelets(data[train_idx], target[train_idx])
                                 times.append(time.time() - t)
+                                print (train_idx, test_idx)
                                 for i in test_idx:
                                     x = data[i]
                                     for label, (classifier, _) in result.items():
@@ -450,6 +450,7 @@ class Evaluation(object):
                                             sum([v.shape[0] for v in sml.shapelets.values()]))
                                         shapelet_length = classifier.shapelet.shape[0]
                                         shapelet_matches = np.array(classifier.predict_all(x)) + shapelet_length // 2
+                                        print shapelet_matches
                                         self.rate(ground_truth[i].get(label, []), shapelet_matches, label, x.shape[0],
                                                   shapelet_length)
                                 print("training time:{}".format(np.mean(times)))
@@ -510,16 +511,7 @@ class Evaluation(object):
         avg_dt = []
         counts = []
         order = [
-            ("wipe", "wipe_start"),
-            ("wipe_end", "wipe_end"),
-            ("force_inc", "force_inc"),
-            ("force_dec", "force_dec"),
-            ("slide", "slide_left_start"),
-            ("slide_end", "slide_left_end"),
-            ("slide_r", "slide_right_start"),
-            ("slide_r_end", "slide_right_end"),
-            ("push", "movable_box"),
-            ("screw", "fixed_screw")
+            ("l1", "label_1")
         ]
         for i, (label, title) in enumerate(order):
             matrix = self.confusion_matrix[label]
@@ -568,11 +560,7 @@ def plot_all_shapelets(result):
     classifiers = dict()
     for i, (label, (classifier, _)) in enumerate(result.items()):
         classifiers[label] = classifier
-    order = [("wipe", "wipe_start"), ("force_inc", "force_inc"), ("slide", "slide_left_start"),
-             ("slide_r", "slide_right_start"),
-             ("push", "movable_box"), ("wipe_end", "wipe_end"), ("force_dec", "force_dec"),
-             ("slide_end", "slide_left_end"),
-             ("slide_r_end", "slide_right_end"), ("screw", "fixed_screw")]
+    order = [("l1","label_1")]
     j = 0
     for i, (label, title) in enumerate(order):
         if classifiers.has_key(label):
