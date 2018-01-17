@@ -13,6 +13,7 @@ from shapelet_utils import subsequences, z_normalize, distance_matrix3D
 import shapelet_utils
 from clustering import Clustering
 from classifier import ShapeletClassifier
+from collections import OrderedDict
 
 BLUE = "#2b83ba"
 RED = "#d7191c"
@@ -425,15 +426,16 @@ class Evaluation(object):
                                                                                                               N_max,
                                                                                                               sl_max))
                             target = np.array([x.keys() for x in ground_truth])
+                            tar_val = ([x.values() for x in ground_truth])
                             times = []
                             self.confusion_matrix = defaultdict(lambda: ConfusionMatrix())
+                            t_idx = defaultdict(lambda:[])
                             for fold_i, (train_idx, test_idx) in enumerate(kf):
                                 if mode == "cv":
                                     print("fold #{}".format(fold_i))
                                 t = time.time()
                                 result = sml.findingshapelets(data[train_idx], target[train_idx])
                                 times.append(time.time() - t)
-                                print (train_idx, test_idx)
                                 for i in test_idx:
                                     x = data[i]
                                     for label, (classifier, _) in result.items():
@@ -450,7 +452,7 @@ class Evaluation(object):
                                             sum([v.shape[0] for v in sml.shapelets.values()]))
                                         shapelet_length = classifier.shapelet.shape[0]
                                         shapelet_matches = np.array(classifier.predict_all(x)) + shapelet_length // 2
-                                        print shapelet_matches
+                                        t_idx[i].append([(tar_val[i], shapelet_matches)])
                                         self.rate(ground_truth[i].get(label, []), shapelet_matches, label, x.shape[0],
                                                   shapelet_length)
                                 print("training time:{}".format(np.mean(times)))
@@ -458,7 +460,9 @@ class Evaluation(object):
                                     times)
                                 sml.reset()
                             print(self.table())
-
+                            print("Index-Actual_values-Prediction_values:")
+                            t_idx = OrderedDict(sorted(t_idx.items()), key = lambda t: t[0])
+                            print t_idx
         if result_file_name != "":
             self.save_results(results, "{}".format(result_file_name))
         return result
