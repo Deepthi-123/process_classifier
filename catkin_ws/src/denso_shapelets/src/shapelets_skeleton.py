@@ -69,9 +69,11 @@ def data_formatting(list_):
       x = (list_[i].split(","))[1].replace("x: ", "")
       y = (list_[i].split(","))[2].replace("y: ", "")
       z = (list_[i].split(","))[3].replace("z: ", "")
-      x_list.append(float(x))
-      y_list.append(float(y))
-      z_list.append(float(z))
+      x_list.append(float(x)) 
+      y_list.append(float(y)) 
+      z_list.append(float(z)) 
+
+      
 n = 0
 def check_for_count(data1):
    global count
@@ -87,7 +89,7 @@ def check_for_count(data1):
    #lst = []
    if (count == 1): 
        tick = 1
-       for i in range(200):
+       for i in range(50):
            rospy.logwarn(t)
 #           rospy.logwarn(tick)
            rospy.logwarn(cache.getElemAfterTime(t))
@@ -156,8 +158,8 @@ if __name__ == '__main__':
     rospy.loginfo(len(x_list))
     rospy.loginfo(len(y_list))
     rospy.loginfo(len(lst))
-    #thefile = open("/home/deepthi/online_test.log", "w")
-    #for item in lst:
-    rospy.loginfo(n)
-      #  thefile.write("%s\n" % item)
+    p = (str(x_list) + ";" + str(y_list) + ";" + str(z_list) + ";[];[]")
+    thefile = open("/home/deepthi/test_online_1.log", "wb")
+    for item in p:
+        thefile.write("%s" % item)
 
